@@ -7,6 +7,7 @@ using Salesforce.Force;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
@@ -53,25 +54,56 @@ namespace Practical.Salesforce
 
                 using (var forceClient = new ForceClient(values["instance_url"], values["access_token"], "v51.0"))
                 {
-                    var described = await forceClient.DescribeAsync<object>("ObjectName");
-                    var query = "select Field1, Field1, Field1, Field1, Field1 from ObjectName where Field1 = 'ABC'";
-                    var result = await forceClient.QueryAsync<SalesforceObject>(query);
+                    //var described = await forceClient.DescribeAsync<object>("Lead");
+                    var query = "select Id, Name, Company, LeadSource, Email, Phone, Description from Lead";
+                    var result = await forceClient.QueryAsync<Lead>(query);
                     var objects = result.Records;
 
-                    var newObject = new SalesforceObject
-                    {
-                        Field1 = "Test",
-                        Field2 = "Test",
-                        Field3 = "Test@abc.com",
-                        Field4 = "Test"
-                    };
+                    await CreateLead(forceClient);
+                    result = await forceClient.QueryAsync<Lead>(query);
+                    objects = result.Records;
 
-                    var created = await forceClient.CreateAsync("ObjectName", newObject);
+                    await UpdateLead(forceClient, objects.First(x => x.Email == "test@abc.com"));
+                    result = await forceClient.QueryAsync<Lead>(query);
+                    objects = result.Records;
 
-                    result = await forceClient.QueryAsync<SalesforceObject>(query);
+                    await DeleteLead(forceClient, objects.First(x => x.Email == "test@abc.com"));
+                    result = await forceClient.QueryAsync<Lead>(query);
                     objects = result.Records;
                 }
             }
+        }
+
+        private static async Task CreateLead(ForceClient forceClient)
+        {
+            var newObject = new Lead
+            {
+                FirstName = "Test First Name",
+                LastName = "Test Last Name",
+                Company = "Test Company",
+                LeadSource = "LinkedIn",
+                Email = "test@abc.com",
+                Phone = "Test Phone",
+                Description = "Test Description"
+            };
+
+            var created = await forceClient.CreateAsync("Lead", newObject);
+        }
+
+        private static async Task UpdateLead(ForceClient forceClient, Lead lead)
+        {
+            var updateObject = new Dictionary<string, object>
+            {
+                { "Company", $"Test Company {DateTimeOffset.Now}" },
+                { "Description", null }
+            };
+
+            var updated = await forceClient.UpdateAsync("Lead", lead.Id, updateObject);
+        }
+
+        private static async Task DeleteLead(ForceClient forceClient, Lead lead)
+        {
+            var deleted = await forceClient.DeleteAsync("Lead", lead.Id);
         }
     }
 }
