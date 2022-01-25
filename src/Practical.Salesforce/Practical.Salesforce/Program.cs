@@ -55,7 +55,7 @@ namespace Practical.Salesforce
                 using (var forceClient = new ForceClient(values["instance_url"], values["access_token"], "v51.0"))
                 {
                     //var described = await forceClient.DescribeAsync<object>("Lead");
-                    var query = "select Id, Name, Company, LeadSource, Email, Phone, Description from Lead";
+                    var query = "select Id, Name, Company, LeadSource, Email, Phone, Description, Address, Owner.Id, Owner.Name from Lead";
                     var result = await forceClient.QueryAsync<Lead>(query);
                     var objects = result.Records;
 
@@ -76,6 +76,10 @@ namespace Practical.Salesforce
 
         private static async Task CreateLead(ForceClient forceClient)
         {
+            var usersResult = await forceClient.QueryAsync<User>("select Id, Name from User where Name like '%Phong%'");
+            var users = usersResult.Records;
+            var owner = users.FirstOrDefault();
+
             var newObject = new Lead
             {
                 FirstName = "Test First Name",
@@ -84,7 +88,9 @@ namespace Practical.Salesforce
                 LeadSource = "LinkedIn",
                 Email = "test@abc.com",
                 Phone = "Test Phone",
-                Description = "Test Description"
+                Description = "Test Description",
+                Country = "VN",
+                OwnerId = owner.Id,
             };
 
             var created = await forceClient.CreateAsync("Lead", newObject);
