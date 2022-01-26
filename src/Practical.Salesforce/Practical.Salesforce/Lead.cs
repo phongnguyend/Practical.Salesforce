@@ -27,5 +27,9 @@
         public User Owner { get; set; }
 
         public string OwnerId { get; set; }
+
+        public string ConvertedOpportunityId { get; set; }
+
+        public Opportunity ConvertedOpportunity { get; set; }
     }
 }

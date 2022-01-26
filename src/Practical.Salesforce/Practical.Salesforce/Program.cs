@@ -55,7 +55,10 @@ namespace Practical.Salesforce
                 using (var forceClient = new ForceClient(values["instance_url"], values["access_token"], "v51.0"))
                 {
                     //var described = await forceClient.DescribeAsync<object>("Lead");
-                    var query = "select Id, Name, Company, LeadSource, Email, Phone, Description, Address, Owner.Id, Owner.Name, Owner.Email, Owner.UserName from Lead";
+                    var query = @"select Id, Name, Company, LeadSource, Email, Phone, Description, Address,
+                    Owner.Id, Owner.Name, Owner.Email, Owner.UserName,
+                    ConvertedOpportunityId, ConvertedOpportunity.Id, ConvertedOpportunity.Name, ConvertedOpportunity.StageName
+                    from Lead";
                     var result = await forceClient.QueryAsync<Lead>(query);
                     var objects = result.Records;
 
