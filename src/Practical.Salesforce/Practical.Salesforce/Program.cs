@@ -79,7 +79,7 @@ namespace Practical.Salesforce
 
         private static async Task CreateLead(ForceClient forceClient)
         {
-            var usersResult = await forceClient.QueryAsync<User>("select Id, Name, Email, UserName from User where Name like '%Phong%'");
+            var usersResult = await forceClient.QueryAsync<User>("select Id, Name, Email, UserName, FullPhotoUrl from User where Name like '%Phong%'");
             var users = usersResult.Records;
             var owner = users.FirstOrDefault();
 
