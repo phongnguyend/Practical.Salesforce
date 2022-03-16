@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 
@@ -62,7 +63,7 @@ namespace Practical.Salesforce
                     var result = await forceClient.QueryAsync<Lead>(query);
                     var objects = result.Records;
 
-                    await CreateLead(forceClient);
+                    await CreateLead(forceClient, values["access_token"]);
                     result = await forceClient.QueryAsync<Lead>(query);
                     objects = result.Records;
 
@@ -77,11 +78,13 @@ namespace Practical.Salesforce
             }
         }
 
-        private static async Task CreateLead(ForceClient forceClient)
+        private static async Task CreateLead(ForceClient forceClient, string token)
         {
             var usersResult = await forceClient.QueryAsync<User>("select Id, Name, Email, UserName, FullPhotoUrl from User where Name like '%Phong%'");
             var users = usersResult.Records;
             var owner = users.FirstOrDefault();
+
+            await DownloadPhoto(token, owner);
 
             var newObject = new Lead
             {
@@ -97,6 +100,23 @@ namespace Practical.Salesforce
             };
 
             var created = await forceClient.CreateAsync("Lead", newObject);
+        }
+
+        private static async Task DownloadPhoto(string token, User owner)
+        {
+            /// https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Common_types
+            var mineTypeToExtentionMappings = new Dictionary<string, string>()
+            {
+                { "image/png","png" }
+            };
+
+            var httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+            var response = await httpClient.GetAsync(owner.FullPhotoUrl);
+            var imageBytes = await response.Content.ReadAsByteArrayAsync();
+
+            var ext = mineTypeToExtentionMappings[response.Content.Headers.ContentType.MediaType];
+            File.WriteAllBytes($"{owner.Id}.{ext}", imageBytes);
         }
 
         private static async Task UpdateLead(ForceClient forceClient, Lead lead)
