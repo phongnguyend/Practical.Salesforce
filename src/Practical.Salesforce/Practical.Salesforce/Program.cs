@@ -58,8 +58,12 @@ namespace Practical.Salesforce
                     //var described = await forceClient.DescribeAsync<object>("Lead");
                     var query = @"select Id, Name, Company, LeadSource, Email, Phone, Description, Address,
                     Owner.Id, Owner.Name, Owner.Email, Owner.UserName,
-                    ConvertedOpportunityId, ConvertedOpportunity.Id, ConvertedOpportunity.Name, ConvertedOpportunity.StageName
+                    IsConverted, ConvertedDate,
+                    ConvertedOpportunityId, ConvertedOpportunity.Id, ConvertedOpportunity.Name, ConvertedOpportunity.StageName,
+                    ConvertedContactId, ConvertedContact.Id, ConvertedContact.Name,
+                    ConvertedAccountId, ConvertedAccount.Id, ConvertedAccount.Name
                     from Lead";
+
                     var result = await forceClient.QueryAsync<Lead>(query);
                     var objects = result.Records;
 

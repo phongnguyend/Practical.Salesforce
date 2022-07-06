@@ -28,8 +28,20 @@
 
         public string OwnerId { get; set; }
 
+        public string IsConverted { get; set; }
+
+        public string ConvertedDate { get; set; }
+
         public string ConvertedOpportunityId { get; set; }
 
         public Opportunity ConvertedOpportunity { get; set; }
+
+        public string ConvertedContactId { get; set; }
+
+        public Contact ConvertedContact { get; set; }
+
+        public string ConvertedAccountId { get; set; }
+
+        public Account ConvertedAccount { get; set; }
     }
 }
